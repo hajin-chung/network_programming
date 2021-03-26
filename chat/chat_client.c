@@ -52,7 +52,6 @@ int main()
         // scanf("%s", out_msg);
 
         fgets(out_msg, MSG_SIZE, stdin);
-        fflush(stdout);
 
         write(sock, out_msg, strlen(out_msg));
     } 
