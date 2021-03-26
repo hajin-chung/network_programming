@@ -51,13 +51,17 @@ int main()
         memset(in_msg, 0, sizeof(in_msg));
 
         printf(" server msg: ");
-        scanf("%s", out_msg);
+        // scanf("%s", out_msg);
+
+        fgets(out_msg, MSG_SIZE, stdin);
+        fflush(stdout);
         write(clnt_sock, out_msg, strlen(out_msg));
 
         listen(clnt_sock, 5);
         read(clnt_sock, in_msg, sizeof(in_msg));
         printf(" client msg: %s \n", in_msg);
     } 
+
     close(clnt_sock);    
     close(serv_sock);
     return 0;
