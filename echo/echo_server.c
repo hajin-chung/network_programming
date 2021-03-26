@@ -48,11 +48,9 @@ int main()
    
     while(1) {
         memset(message, 0, sizeof(message));
-        fputs("Message to send : ", stdout);
-        scanf("%s", message);
-        if(strcmp(message, "/End") == 0) {
-            break; 
-        }
+        
+        printf("Message to send : ");
+        fgets(message, MSG_SIZE, stdin);
         write(clnt_sock, message, strlen(message));
     } 
     close(clnt_sock);    
