@@ -59,7 +59,7 @@ int main()
 
         listen(clnt_sock, 5);
         read(clnt_sock, in_msg, sizeof(in_msg));
-        printf(" client msg: %s \n", in_msg);
+        printf(" client msg: %s", in_msg);
     } 
 
     close(clnt_sock);    

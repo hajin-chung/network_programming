@@ -46,7 +46,7 @@ int main()
             break;
         } 
 
-        printf(" server msg: %s \n", in_msg);  
+        printf(" server msg: %s", in_msg);  
           
         printf(" client msg: ");
         // scanf("%s", out_msg);
