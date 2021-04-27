@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#define MSG_SIZE 101
+#define BUFFER_SIZE 1024
 
 void error_handling(char *message);
 
@@ -13,47 +13,50 @@ int main()
 {
     int sock;
     struct sockaddr_in serv_addr;
-    char in_msg[MSG_SIZE + 1], out_msg[MSG_SIZE+1];
+    char buffer[BUFFER_SIZE+1];
     int str_len;
-    int port = 5000;
-    char ip[20]="172.16.1.229";
-
-    int yes = 1;  // for socket reuse. I dont know why... 
+    int port = 9100;
+    char ip[30];
+    printf("[IP]: ");
+    scanf("%s", ip);
+    char yes = 'N';
+    
+    int opt = 1;   
 
     sock=socket(PF_INET, SOCK_STREAM, 0);
     if(sock == -1)
         error_handling("socket() error");
-
+    
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family=AF_INET;
     serv_addr.sin_addr.s_addr=inet_addr(ip);
     serv_addr.sin_port=htons(port);
 
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) 
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
         error_handling("setsockopt() error!");
+    }
 
     if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))==-1) 
         error_handling("connect() error!");
 
+    memset(buffer, '\0', sizeof(buffer)); 
+    read(sock, buffer, sizeof(buffer));
+    printf("%s\n", buffer);
+    
     while(1) {
-        memset(out_msg, 0, sizeof(out_msg));
-        memset(in_msg, 0, sizeof(in_msg));
+        printf("Message to send: ");
+        fgets(buffer, BUFFER_SIZE, stdin);
+        if(strcmp(buffer, "q") == 0 || strcmp(buffer, "Q") == 0) break;
+        write(sock, buffer, strlen(buffer));
 
-        str_len=read(sock, in_msg, sizeof(in_msg));
-
+        memset(buffer, '\0', sizeof(buffer)); 
+        str_len=read(sock, buffer, sizeof(buffer));
         if(str_len==-1) {
             error_handling("read() error!");
             break;
         } 
 
-        printf(" server msg: %s", in_msg);  
-          
-        printf(" client msg: ");
-        // scanf("%s", out_msg);
-
-        fgets(out_msg, MSG_SIZE, stdin);
-
-        write(sock, out_msg, strlen(out_msg));
+        printf("Message from server: %s\n", buffer);  
     } 
     close(sock);
 

@@ -25,12 +25,6 @@ struct Client {
     int is_connected;
 };
 
-struct Message {
-    int id_from;
-    int id_to;
-    char message[100];
-};
-
 struct Client clients[MAX_CLIENTS];
 
 void error_handling(char *message);
@@ -95,7 +89,7 @@ int main(int argc , char *argv[])
 	
 		activity = select(max_sd+1, &readfds, NULL, NULL, NULL);
 	
-		if ((activity < 0) && (errno!=EINTR)) error_handling("select() error");
+		if (activity < 0) error_handling("select() error");
 			
 		if (FD_ISSET(master_socket, &readfds))
 		{
@@ -116,7 +110,7 @@ int main(int argc , char *argv[])
 				{
 					clients[i] = new_client;
                     clients[i].id = i;
-					printf("Added Client on index %d\n" , i);
+					printf("New client on index %d\n" , i);
 					break;
 				}
 		}
@@ -127,23 +121,16 @@ int main(int argc , char *argv[])
 			if (FD_ISSET(sd , &readfds))
 			{
                 valread = read(sd, buffer, 1024);
-				if (valread == 0)
-				{
+
+				if (valread == 0) {
                     getpeername(sd, (struct sockaddr*)&address, (socklen_t*)&addrlen); 
-					printf("Host disconnected | ip : %s | port %d \n", 
-                            inet_ntoa(address.sin_addr), ntohs(address.sin_port));
+					printf("Client index %d disconnected | ip : %s | port %d \n", 
+                            i, inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 						
 					close(sd);
                     memset(&clients[i], 0, sizeof(struct Client));
-				}
-					
-				else
-				{
+				} else {
 					buffer[valread] = '\0';
-                    // send(sd , buffer , strlen(buffer) , 0 );
-
-                    printf("%s\n", buffer);
-
                     client_handling(i, buffer);
 				}
 			}
@@ -176,7 +163,7 @@ int send_message(char *buffer) {
     int dest_sd;
 
     sscanf(buffer, "%s %s %s %s", type, to, from, msg);
-    printf("%s -> %s : %s |||\n\n", from, to, msg);
+    printf("SEND MESSAGE : %s -> %s : %s\n", from, to, msg);
     dest_sd = name_to_client(to).socket;
     
     write(dest_sd, msg, strlen(msg));
@@ -186,6 +173,9 @@ int send_message(char *buffer) {
 int set_name(int idx, char *buffer) {
     char type[30];
     char name[30];
+
+    memset(type, '\0', sizeof(type));
+    memset(name, '\0', sizeof(name));
 
     sscanf(buffer, "%s %s", type, name); // param1 -> name
     strcpy(clients[idx].name, name);
@@ -197,12 +187,12 @@ int get_users(int idx) {
     char buffer[1025];
     int i;
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(buffer, '\0', sizeof(buffer));
         
     for(i=0 ; i<MAX_CLIENTS ; i++) 
         if(clients[i].is_connected) {
-            printf("%s\n", clients[i].name); 
-            sprintf(buffer, "%s ", clients[i].name); 
+            strcat(buffer, clients[i].name);
+            strcat(buffer, "\n");
         }
 
     write(clients[idx].socket, buffer, strlen(buffer));

@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#define MSG_SIZE 101
+#define MSG_SIZE 1024
 
 void error_handling(char *message);
 
@@ -45,14 +45,24 @@ int main()
     clnt_sock=accept(serv_sock, (struct sockaddr*)&clnt_addr,&clnt_addr_size);
     if(clnt_sock==-1)
         error_handling("accept() error");  
+    
+    write(clnt_sock, "SERVER CONNECTED", strlen("SERVER CONNECTED"));
+
    
     while(1) {
+        memset(message, 0, sizeof(message));
+
+        listen(clnt_sock, 5);
+        read(clnt_sock, message, sizeof(message));
+        printf("Client Message: %s\n", message);
+
         memset(message, 0, sizeof(message));
         
         printf("Message to send : ");
         fgets(message, MSG_SIZE, stdin);
         write(clnt_sock, message, strlen(message));
     } 
+
     close(clnt_sock);    
     close(serv_sock);
     return 0;
