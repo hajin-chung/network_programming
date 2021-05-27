@@ -10,10 +10,7 @@
 #define MAX_BUF	255
 #define MAX_SOCK 10
 #define TTL	2
-#define BUF_SIZE 5120
-
-char server_ip[20];
-char server_port[20];
+#define BUF_SIZE 255
 
 struct Client {
     int is_active;
@@ -21,7 +18,9 @@ struct Client {
     struct sockaddr_in addr;
 };
 
-void send_server_info(int sock, struct sockaddr_in adr);
+void send_server_info(int sock, struct sockaddr_in adr, 
+    char* server_ip, char* server_port);
+void print_client_info(int max_client, struct Client clients[MAX_SOCK]);
 
 int main(int argc, char **argv)
 {
@@ -40,6 +39,9 @@ int main(int argc, char **argv)
 
     char buf[MAX_BUF];
     int stdin_fd = fileno(stdin);
+    char server_ip[20];
+    char server_port[20];
+
     state = 0;
 
     if(argc!=5) {
@@ -65,6 +67,7 @@ int main(int argc, char **argv)
 	setsockopt(multicast_sockfd, IPPROTO_IP, 
         IP_MULTICAST_TTL, (void*)&time_live, sizeof(time_live));
 
+    printf("[*] set server socket");
     // server socket setup
     if ((server_sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("socket error : ");
@@ -109,13 +112,14 @@ int main(int argc, char **argv)
 
     while(1)
     {
+        printf("[*] Main while loop\n");
         allfds = readfds;
 		timeout.tv_sec=5;
 		timeout.tv_usec=5000;
         state = select(maxfd + 1 , &allfds, NULL, NULL, &timeout);
 
         if(state == 0) { // send server infos 
-            send_server_info(multicast_sockfd, multicastaddr);
+            send_server_info(multicast_sockfd, multicastaddr, server_ip, server_port);
         }
 
 	    // Server Socket - accept from client
@@ -161,16 +165,7 @@ int main(int argc, char **argv)
             
             if(strcmp(buf, "/list") == 0)
             {
-                printf("======= Client List =======\n");
-                for(i=0 ; i<=max_client ; i++)
-                {
-                    if(clients[i].is_active)
-                    {
-                        printf("[%d] ip : %s, port : %d\n", 
-                            inet_ntoa(clients[i].addr.sin_addr),ntohs(clients[i].addr.sin_port));
-                    }
-                }
-                printf("===========================\n\n");
+                print_client_info(max_client, clients);
             }
         }
 
@@ -185,7 +180,7 @@ int main(int argc, char **argv)
             {
                 memset(buf, 0, MAX_BUF);
 
-		// Disconnet from Client 
+                // Disconnet from Client 
                 if (read(sockfd, buf, MAX_BUF) <= 0) {
                     printf("Close sockfd : %d\n",sockfd);
             	    printf("===================================\n");
@@ -204,7 +199,7 @@ int main(int argc, char **argv)
     } // while
 }
 
-void send_server_info(int sock, struct sockaddr_in adr)
+void send_server_info(int sock, struct sockaddr_in adr, char* server_ip, char* server_port)
 {
     char buf[BUF_SIZE];
 
@@ -214,4 +209,19 @@ void send_server_info(int sock, struct sockaddr_in adr)
 
     sendto(sock, buf, BUF_SIZE, 0,(struct sockaddr *)&adr, sizeof(adr));
     printf("[*] server info sent ip: %s, port: %s\n", server_ip, server_port);
+}
+
+void print_client_info(int max_client, struct Client clients[MAX_SOCK])
+{
+    int i;
+    printf("======= Client List =======\n");
+    for(i=0 ; i<=max_client ; i++)
+    {
+        if(clients[i].is_active)
+        {
+            printf("[%d] ip : %s, port : %d\n", 
+                i, inet_ntoa(clients[i].addr.sin_addr),ntohs(clients[i].addr.sin_port));
+        }
+    }
+    printf("===========================\n\n");
 }
