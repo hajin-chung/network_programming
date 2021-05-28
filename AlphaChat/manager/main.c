@@ -16,8 +16,10 @@
 
 int main()
 {
+    int mcast_sock; // socket for mcasting
     int heartbeat_sock;
     int tcp_sock; // socket for recieving client commands
+    struct sockaddr_in mcast_addr;
 
     int fd_num;
     int fd_cnt;
@@ -31,10 +33,12 @@ int main()
     printf("--------------------------------------\n");
 
     // init heartbeat_sock (udp)
+    make_mcast_socket(&mcast_sock, &mcast_addr, MULTICAST_IP, MULTICAST_PORT);
     make_udp_socket(&heartbeat_sock, UDP_PORT);
     make_tcp_socket(&tcp_sock, TCP_PORT);
 
     // init fd_set
+    // heartbeat_socket, tcp_socket
     FD_ZERO(&fdset);
     FD_SET(heartbeat_sock, &fdset);
     FD_SET(tcp_sock, &fdset);
@@ -55,7 +59,7 @@ int main()
         }
         else if(fd_num == 0) // multicast server info every TIME_VAL_SECONDS seconds;
         {
-            multicast_server_info();
+            multicast_server_info(mcast_sock, mcast_addr);
         }
         else if(fd_num == heartbeat_sock) 
         {
@@ -69,36 +73,44 @@ int main()
     return 0;
 }
 
-void multicast_server_info()
+// 서버의 아이피와 포트번호가 들어있는 패킷을 만든다.
+// char[30] [0 ~ 15] : ip / [16 ~ 30] : port
+void multicast_server_info(int sock, struct sockaddr_in addr)
 {
-    int msock;
-    int ttl = MULTICAST_TTL;
-    struct sockaddr_in addr;
     char buf[MULTICAST_BUF_SIZE];
     char port[15];
     char ip[15];
 
+    // array initialize to zero
+    memset(buf, 0, MULTICAST_BUF_SIZE);
     memset(ip, 0, 15);
     memset(port, 0, 15);
 
+    // SERVER_IP -> ip, TCP_PORT -> port (형변환)
     memcpy(ip, SERVER_IP, sizeof(SERVER_IP));
     itoa(TCP_PORT, port);
-
-    printf("[*] multicast server info %s %s\n", ip, port);
-
-    msock = socket(PF_INET, SOCK_DGRAM, 0);
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr=inet_addr(MULTICAST_IP);
-	addr.sin_port=htons(TCP_PORT);
-
-	setsockopt(msock, IPPROTO_IP, IP_MULTICAST_TTL, (void*)&ttl, sizeof(ttl));
 
     memset(buf, 0, MULTICAST_BUF_SIZE);
     memcpy(&buf[0], ip, strlen(ip));
     memcpy(&buf[16], port, strlen(port));
 
-	sendto(msock, buf, MULTICAST_BUF_SIZE, 0,(struct sockaddr *)&addr, sizeof(addr));    
+    printf("[*] multicast server info %s %s\n", ip, port);
+	sendto(sock, buf, MULTICAST_BUF_SIZE, 0,(struct sockaddr *)&addr, sizeof(addr));    
+}
+
+void make_mcast_socket(int* sock, struct sockaddr_in* addr, char* ip, int port) 
+{
+    printf("[*] make multicast socket\n");
+    int ttl = MULTICAST_TTL;
+
+    *sock = socket(PF_INET, SOCK_DGRAM, 0);
+
+    memset(addr, 0, sizeof(addr));
+    (*addr).sin_family = AF_INET;
+    (*addr).sin_addr.s_addr=inet_addr(ip);
+	(*addr).sin_port=htons(port);
+
+	setsockopt(*sock, IPPROTO_IP, IP_MULTICAST_TTL, (void*)&ttl, sizeof(ttl));
 }
 
 void make_udp_socket(int* sock, int port)

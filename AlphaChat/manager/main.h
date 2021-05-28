@@ -31,6 +31,7 @@
 
 struct timeval tv; 
 
-void multicast_server_info();
+void multicast_server_info(int sock, struct sockaddr_in addr);
+void make_mcast_socket(int* sock, struct sockaddr_in* addr, char* ip, int port);
 void make_udp_socket(int* sock, int port);
 void make_tcp_socket(int* sock, int port);
