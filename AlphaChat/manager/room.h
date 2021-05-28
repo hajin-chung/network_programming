@@ -1,15 +1,14 @@
-#ifndef _CHAT_H
-#define _CHAT_H
+#pragma once
 
-#include "chat.h"
+#include "req.h"
+#include "user.h"
 
-#endif
-
-#define ROOM_TITLE_MAX_LEN 30
 #define ROOM_HISTORY_LEN 5
+#define ROOM_USER_MAX 10
 
 struct ROOM {
     int id;
-    char title[ROOM_TITLE_MAX_LEN];
-    struct CHAT history[ROOM_HISTORY_LEN];
+    char name[ROOMNAME_MAX_LEN];
+    struct SendChat history[ROOM_HISTORY_LEN];
+    struct USER users[ROOM_USER_MAX];
 };

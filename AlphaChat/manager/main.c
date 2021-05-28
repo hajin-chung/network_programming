@@ -18,12 +18,10 @@ int main()
 {
     int mcast_sock; // socket for mcasting
     int heartbeat_sock;
-    int tcp_sock; // socket for recieving client commands
+    int serv_sock; // socket for recieving client commands
     struct sockaddr_in mcast_addr;
-
     int fd_num;
-    int fd_cnt;
-    fd_set backup_set, fdset;
+    int i;
 
     printf("[*] Server starting\n");
     printf("----------------[INFO]----------------\n");
@@ -35,24 +33,23 @@ int main()
     // init heartbeat_sock (udp)
     make_mcast_socket(&mcast_sock, &mcast_addr, MULTICAST_IP, MULTICAST_PORT);
     make_udp_socket(&heartbeat_sock, UDP_PORT);
-    make_tcp_socket(&tcp_sock, TCP_PORT);
+    make_tcp_socket(&serv_sock, TCP_PORT);
 
     // init fd_set
-    // heartbeat_socket, tcp_socket
+    // heartbeat_socket, serv_socket
     FD_ZERO(&fdset);
     FD_SET(heartbeat_sock, &fdset);
-    FD_SET(tcp_sock, &fdset);
-    fd_cnt = heartbeat_sock;
-    backup_set = fdset;
+    FD_SET(serv_sock, &fdset);
+    fd_cnt = serv_sock;
 
     while(1)
     {
-        fdset = backup_set;
+        backup_set = fdset;
 
         tv.tv_sec = TIME_VAL_SECONDS;
         tv.tv_usec = 0;
 
-        fd_num = select(fd_cnt+1, &fdset, 0, 0, &tv);
+        fd_num = select(fd_cnt+1, &backup_set, 0, 0, &tv);
         if(fd_num == -1)
         {
             printf("[!] Server Error on select\n");
@@ -61,14 +58,23 @@ int main()
         {
             multicast_server_info(mcast_sock, mcast_addr);
         }
-        else if(fd_num == heartbeat_sock) 
+        else if(FD_ISSET(heartbeat_sock, &backup_set)) 
         {
-            // recieve heartbeat 
+            handle_heartbeat(heartbeat_sock);
         }
-        else if(fd_num == tcp_sock)
+        else if(FD_ISSET(serv_sock, &backup_set))
         {
-            // recieve command
+            handle_new_user(serv_sock);
         }
+
+        for(i=0 ; i<users_cnt ; i++)
+        {
+            if(FD_ISSET(users[i].sock, &backup_set))
+            {
+                handle_request(users[i].sock, i);
+            }
+        }
+        
     }
     return 0;
 }
@@ -96,6 +102,70 @@ void multicast_server_info(int sock, struct sockaddr_in addr)
 
     printf("[*] multicast server info %s %s\n", ip, port);
 	sendto(sock, buf, MULTICAST_BUF_SIZE, 0,(struct sockaddr *)&addr, sizeof(addr));    
+}
+
+void handle_heartbeat(int sock)
+{
+    char buf[4];
+    struct sockaddr_in clnt_addr;
+    int len;
+    struct HeartBeat hb;
+    struct USER user;
+    socklen_t clnt_addr_sz;
+
+    memset(&hb, 0, sizeof(hb));
+
+    memset(buf, 0, 4);
+    clnt_addr_sz = sizeof(clnt_addr);
+    
+    len = recvfrom(sock, buf, 4, 0, (struct sockaddr*)&clnt_addr, &clnt_addr_sz);
+    // error handling
+
+    hb.user_id = atoi(buf);
+
+    printf("[*] Received [%d] heart beat\n", hb.user_id);
+    users[hb.user_id].status = USER_STATUS_ONLINE;
+}
+
+void handle_new_user(int sock) 
+{
+    int i;
+    int clnt_sock;
+    int clnt_len;
+    struct sockaddr_in clnt_addr;
+    int uid;
+
+    clnt_len = sizeof(clnt_addr);
+    clnt_sock = accept(sock, (struct sockaddr *)&clnt_addr, &clnt_len); 
+    printf("[*] new user connected\n");
+
+    uid = get_new_uid();
+    users[uid].status = USER_STATUS_ONLINE;
+    users[uid].sock = clnt_sock;
+    users[uid].id = i;
+
+    FD_SET(clnt_sock, &fdset);
+    if(clnt_sock > fd_cnt) fd_cnt = clnt_sock;
+    users_cnt++;
+
+    printf("[*] connection from (%s , %d)\n", 
+        inet_ntoa(clnt_addr.sin_addr), ntohs(clnt_addr.sin_port));
+    printf("    user id : %d, clnt sock : %d\n", uid, clnt_sock);
+}
+
+int get_new_uid()
+{
+    int i;
+
+    for(i=0 ; i<users_cnt ; i++)
+    {
+        if(users[i].status == USER_STATUS_OFFLINE)
+        {
+            return i;
+        }
+    }
+
+    return 0;
 }
 
 void make_mcast_socket(int* sock, struct sockaddr_in* addr, char* ip, int port) 
