@@ -18,6 +18,10 @@ int main(int argc, char *argv[])
 	int str_len;
 	struct sockaddr_in serv_adr;
     fd_set backup_set, fdset;
+	int fd_num;
+	int fd_cnt;
+	int stdin_fd = fileno(stdin);
+	struct timeval tv; 
 
 	if(argc!=3) {
 		printf("Usage : %s <IP> <port>\n", argv[0]);
@@ -37,19 +41,45 @@ int main(int argc, char *argv[])
 		printf("connect() error!"); exit(0); }
 	else
 		printf("Connected...........\n");
+
+	FD_ZERO(&fdset);
+	FD_SET(sock, &fdset);
+	FD_SET(stdin_fd, &fdset);
+	fd_cnt = sock;
 	
 	while(1) 
 	{
-		memset(message, 0, BUF_SIZE);
-		fputs("Input message(Q to quit): ", stdout);
-		fgets(message, BUF_SIZE, stdin);
-		
-		if(!strcmp(message,"q\n") || !strcmp(message,"Q\n"))
-			break;
+		backup_set = fdset;
 
-		write(sock, message, strlen(message));
-		str_len=read(sock, message, BUF_SIZE);
-		printf("Message from server: %s\n", message);
+		tv.tv_sec = 5;
+		tv.tv_usec = 0;
+
+		fd_num = select(fd_cnt+1, &backup_set, 0, 0, &tv);
+
+		if(fd_num == -1)
+		{
+			printf("error!\n");
+		}
+		else if(FD_ISSET(stdin_fd, &backup_set))
+		{
+			memset(message, 0, BUF_SIZE);
+			fgets(message, BUF_SIZE, stdin);
+			
+			if(!strcmp(message,"q\n") || !strcmp(message,"Q\n"))
+				break;
+
+			write(sock, message, strlen(message));
+		}
+		else if(FD_ISSET(sock, &backup_set))
+		{
+			str_len=read(sock, message, BUF_SIZE);
+			if(str_len <= 0)
+			{
+				return 0;
+			}
+			printf("Message from server: %s\n", message);
+		}
+
 	}
 	
 	close(sock);

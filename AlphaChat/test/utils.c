@@ -1,6 +1,7 @@
 #include "utils.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 void itoa(int i, char *st)
 {
@@ -12,12 +13,8 @@ int atoi_size(char* src, int offset, int size)
 {
 	int len = strlen(src);
 	char* dest;
-	int ans;
 
 	dest = malloc(len);
 	memcpy(dest, src+offset, size);
-	ans = atoi(dest);
-
-	free(dest);
-	return ans;
+	return atoi(dest);
 }

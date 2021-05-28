@@ -1,14 +1,28 @@
 #pragma once
 
-#include "req.h"
-#include "user.h"
-
+#define ROOM_MAX 1000
+#define ROOM_NAME_MAX_LEN 100
 #define ROOM_HISTORY_LEN 5
 #define ROOM_USER_MAX 10
 
+#define ROOM_STATUS_OFF 0 
+#define ROOM_STATUS_ON 1
+
+#include "req.h"
+#include "user.h"
+
 struct ROOM {
     int id;
-    char name[ROOMNAME_MAX_LEN];
+    char name[ROOM_NAME_MAX_LEN];
     struct SendChat history[ROOM_HISTORY_LEN];
-    struct USER users[ROOM_USER_MAX];
+    int super_user_id;
+    int users[ROOM_USER_MAX];
+    int user_cnt;
+    int status;
 };
+
+struct ROOM rooms[ROOM_MAX];
+int rooms_cnt;
+
+int new_room_id();
+int room_contains_user(int room_id, int user_id);

@@ -13,6 +13,9 @@
 */
 
 #include "main.h"
+#include "utils.h"
+#include "set.h"
+#include "user.h"
 
 int main()
 {
@@ -139,7 +142,7 @@ void handle_new_user(int sock)
     clnt_sock = accept(sock, (struct sockaddr *)&clnt_addr, &clnt_len); 
     printf("[*] new user connected\n");
 
-    uid = get_new_uid();
+    uid = new_user_id();
     users[uid].status = USER_STATUS_ONLINE;
     users[uid].sock = clnt_sock;
     users[uid].id = i;
@@ -151,21 +154,6 @@ void handle_new_user(int sock)
     printf("[*] connection from (%s , %d)\n", 
         inet_ntoa(clnt_addr.sin_addr), ntohs(clnt_addr.sin_port));
     printf("    user id : %d, clnt sock : %d\n", uid, clnt_sock);
-}
-
-int get_new_uid()
-{
-    int i;
-
-    for(i=0 ; i<users_cnt ; i++)
-    {
-        if(users[i].status == USER_STATUS_OFFLINE)
-        {
-            return i;
-        }
-    }
-
-    return 0;
 }
 
 void make_mcast_socket(int* sock, struct sockaddr_in* addr, char* ip, int port) 

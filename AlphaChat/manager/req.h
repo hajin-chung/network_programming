@@ -4,6 +4,7 @@
 #define ROOMNAME_MAX_LEN 100
 #define ROOMPASS_MAX_LEN 20
 #define CONTENTS_MAX_LEN 512
+#define MAX_REQ_BUF_SIZE 1024
 
 #define REQ_ROOM_CREATE_CODE 0
 #define REQ_ROOM_DELETE_CODE 1 
@@ -11,6 +12,8 @@
 #define REQ_SEND_CHAT_CODE 3
 #define REQ_ROOM_INVITE_CODE 4
 #define REQ_REGISTER_CODE 5
+#define REQ_ROOM_LIST_CODE 6
+#define REQ_USER_LIST_CODE 7
 
 //Set Main Struct
 struct Register {
@@ -47,11 +50,14 @@ struct RoomInvite {
 	int room_id;
 };
 
-void user_register(char* buf);
-void room_create(char* buf);
-void room_delete(char* buf);
-void room_connect(char* buf);
-void room_invite(char* buf);
-void send_chat(char* buf);
+void user_register(char* buf, int uid);
+void room_create(char* buf, int uid);
+void room_delete(char* buf, int uid);
+void room_connect(char* buf, int uid);
+void room_invite(char* buf, int uid);
+void send_chat(char* buf, int uid);
+void user_list(char* buf, int uid);
+void room_list(char* buf, int uid);
+
 
 void handle_request(int sock, int uid);
