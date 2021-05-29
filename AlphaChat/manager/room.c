@@ -15,6 +15,8 @@ int new_room_id()
     return 0;
 }
 
+// if user is in room_id return 1
+// else return 0
 int room_contains_user(int room_id, int user_id)
 {
     int i;

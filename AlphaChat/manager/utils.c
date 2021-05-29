@@ -1,6 +1,8 @@
-#include "utils.h"
-#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "utils.h"
 #include "room.h"
 #include "user.h"
 
@@ -27,11 +29,11 @@ int atoi_size(char* src, int offset, int size)
 void print_room_info()
 {
 	int i, j;
-	printf("-------------[ROOM INFO]-------------\n");
+	printf("\n-------------[ROOM INFO]-------------\n");
 	printf("	room cnt: %d\n", rooms_cnt);
 	for(i=0 ; i<rooms_cnt ; i++)
 	{
-		printf("\n	---[ROOM %d]---\n", i);
+		printf("\n	---------[ROOM %d]---------\n", i);
 		printf("		name: %s\n", rooms[i].name);
 		printf("		su: %d\n", rooms[i].super_user_id);
 		printf("		status: %d\n", rooms[i].status);
@@ -42,7 +44,7 @@ void print_room_info()
 			printf("%d, ", rooms[i].users[j]);
 		}
 		printf("\n");
-		printf("	---------------\n");
+		printf("	---------------------------\n");
 	}	
 	printf("-------------------------------------\n");
 }
@@ -50,16 +52,26 @@ void print_room_info()
 void print_user_info()
 {
 	int i, j;
-	printf("-------------[USER INFO]-------------\n");
+	printf("\n-------------[USER INFO]-------------\n");
 	printf("	user cnt: %d\n", users_cnt);
 	for(i=0 ; i<users_cnt ; i++)
 	{
-		printf("\n	---[user %d]---\n", i);
+		printf("\n	---------[user %d]---------\n", i);
 		printf("		name: %s\n", users[i].name);
 		printf("		id: %d\n", users[i].id);
 		printf("		status: %d\n", users[i].status);
 		printf("		sock: %d\n", users[i].sock);
-		printf("	---------------\n");
+		printf("	---------------------------\n");
 	}	
 	printf("-------------------------------------\n");
+}
+
+void print_server_info()
+{
+    printf("[*] Server starting\n");
+    printf("\n----------------[INFO]----------------\n");
+    printf("    MULTICAST : %s:%d\n", MULTICAST_IP, MULTICAST_PORT);
+    printf("    SERVER    : %s:%d\n", SERVER_IP, TCP_PORT);
+    printf("    HEARDBEAT : %d\n", UDP_PORT);
+    printf("--------------------------------------\n");
 }

@@ -1,7 +1,7 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdio.h>
 
 #include "set.h"
 #include "user.h"
@@ -86,8 +86,6 @@ void user_register(char* buf, int uid)
     memcpy(users[uid].name, user_name, USER_NAME_MAX_LEN);
     
     printf("[*] user_register() user id %d name %s\n", uid, users[uid].name);
-
-    // send user id to user
     
     memset(log, 0, LOG_MAX_LEN);
     sprintf(log, "[*] Success user register id %d, name %s", uid, user_name);
@@ -123,8 +121,6 @@ void room_create(char* buf, int uid)
 
     printf("[*] room_create() room id %d room name %s user id %d\n", room_id, room_name, user_id);
 
-    // send user success signal
-
     memset(log, 0, LOG_MAX_LEN);
     sprintf(log, "[*] Success room create room id %d, room name %s", room_id, room_name);
 
@@ -149,7 +145,6 @@ void room_delete(char* buf, int uid)
     {
         rooms[room_id].status = ROOM_STATUS_OFF;
         printf("[*] room_delete success room id %d user id %d\n", room_id, user_id);
-        // send user success signal
 
         sprintf(log, "[*] Success room delete room id %d", room_id);
 
@@ -158,7 +153,6 @@ void room_delete(char* buf, int uid)
     else 
     {
         printf("[!] room_delete() invalid access : non-super-user tried to delete room\n");
-        // send user invalid access
 
         sprintf(log, "[*] Error room delete invalid access");
 
@@ -229,8 +223,6 @@ void room_invite(char* buf, int uid)
     }
 }
 
-// type(4), user_id(4), room_id(4), contents(512)
-// type: TEXT 1, EMOJI 2, FILE 3
 void send_chat(char* buf, int uid)
 {
     int type;
@@ -277,9 +269,6 @@ void send_chat(char* buf, int uid)
     }
 }
 
-// 
-// 사실 유저리스트 리퀘스트 처리할 때 유저 아이디 프로토콜로 받아와야 하지만
-// 그렇게 안함;;
 void user_list(char* buf, int uid)
 {
     res_user_list(uid);

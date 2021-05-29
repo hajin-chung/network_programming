@@ -1,11 +1,5 @@
-#pragma once
-
-#define ROOM_STATUS_OFF 0 
-#define ROOM_STATUS_ON 1
-
 #include "const.h"
 #include "req.h"
-#include "user.h"
 
 struct ROOM {
     int id;

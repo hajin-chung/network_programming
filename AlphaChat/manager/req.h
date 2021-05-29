@@ -19,39 +19,11 @@
 #define CHAT_TYPE_EMOJ 2
 #define CHAT_TYPE_FILE 3
 
-//Set Main Struct
-struct Register {
-	char name[USER_NAME_MAX_LEN];
-};
-
-struct RoomCreate {
-	int user_id;
-	char room_name[ROOM_NAME_MAX_LEN];
-	char password[ROOMPASS_MAX_LEN];
-};
-
-struct RoomDelete {
-	int user_id;
-	char room_id;
-	char password[ROOMPASS_MAX_LEN];
-};
-
-struct RoomConnect {
-	int user_id;
-	char room_id;
-	char password[ROOMPASS_MAX_LEN];
-};
-
 struct SendChat {
 	int type;
 	int user_id;
 	int room_id;
 	char contents[CONTENTS_MAX_LEN];
-};
-
-struct RoomInvite {
-	int user_id;
-	int room_id;
 };
 
 void user_register(char* buf, int uid);

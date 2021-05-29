@@ -1,18 +1,18 @@
-#include <unistd.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "res.h"
-#include "user.h"
-#include "room.h"
 #include "utils.h"
+#include "room.h"
+#include "user.h"
 
+// TODO error handling
 void send_to_user(int uid, char* buf, int size)
 {
     struct USER user = users[uid];
 
-    // error handling
-    // if user is offline return
     write(user.sock, buf, size);
 }
 
@@ -49,8 +49,9 @@ void res_user_list(int uid)
         offset += 4;
     }
 
-    printf("[*] size: %d, user cnt: %d\n    ", size, users_cnt);
+    printf("[*] Res user list size(%d) user_cnt(%d): ", size, users_cnt);
     fwrite(buf, sizeof(char), size, stdout);
+    printf("\n");
     send_to_user(uid, buf, size);
 }
 
@@ -79,6 +80,8 @@ void res_room_list(int uid)
     }
     itoa(cnt, buf);
 
-    printf("[*] res room list buffer : %.*s\n", size, buf);
+    printf("[*] Res room list: ");
+    fwrite(buf, sizeof(char), size, stdout);
+    printf("\n");
     send_to_user(uid, buf, size);
 }

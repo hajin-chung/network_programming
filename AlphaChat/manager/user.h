@@ -1,5 +1,3 @@
-#pragma once
-
 #include "const.h"
 
 struct USER {
