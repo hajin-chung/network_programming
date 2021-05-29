@@ -1,13 +1,9 @@
 #pragma once
 
-#define ROOM_MAX 1000
-#define ROOM_NAME_MAX_LEN 100
-#define ROOM_HISTORY_LEN 5
-#define ROOM_USER_MAX 10
-
 #define ROOM_STATUS_OFF 0 
 #define ROOM_STATUS_ON 1
 
+#include "const.h"
 #include "req.h"
 #include "user.h"
 

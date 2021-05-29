@@ -1,6 +1,8 @@
 #include "utils.h"
 #include <string.h>
 #include <stdlib.h>
+#include "room.h"
+#include "user.h"
 
 void itoa(int i, char *st)
 {
@@ -20,4 +22,44 @@ int atoi_size(char* src, int offset, int size)
 
 	free(dest);
 	return ans;
+}
+
+void print_room_info()
+{
+	int i, j;
+	printf("-------------[ROOM INFO]-------------\n");
+	printf("	room cnt: %d\n", rooms_cnt);
+	for(i=0 ; i<rooms_cnt ; i++)
+	{
+		printf("\n	---[ROOM %d]---\n", i);
+		printf("		name: %s\n", rooms[i].name);
+		printf("		su: %d\n", rooms[i].super_user_id);
+		printf("		status: %d\n", rooms[i].status);
+		printf("		user cnt: %d\n", rooms[i].user_cnt);
+		printf("		users: ");
+		for(j=0 ; j<rooms[i].user_cnt ; j++)
+		{
+			printf("%d, ", rooms[i].users[j]);
+		}
+		printf("\n");
+		printf("	---------------\n");
+	}	
+	printf("-------------------------------------\n");
+}
+
+void print_user_info()
+{
+	int i, j;
+	printf("-------------[USER INFO]-------------\n");
+	printf("	user cnt: %d\n", users_cnt);
+	for(i=0 ; i<users_cnt ; i++)
+	{
+		printf("\n	---[user %d]---\n", i);
+		printf("		name: %s\n", users[i].name);
+		printf("		id: %d\n", users[i].id);
+		printf("		status: %d\n", users[i].status);
+		printf("		sock: %d\n", users[i].sock);
+		printf("	---------------\n");
+	}	
+	printf("-------------------------------------\n");
 }

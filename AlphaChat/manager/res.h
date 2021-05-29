@@ -1,36 +1,41 @@
 //res.h : FOR RESPONSE TO CLIENT
+#include "const.h"
 
-#define ERROR_LOG_MAX_LEN 100
-#define USERCNT_MAX_LEN 1000
-#define USERNAME_MAX_LEN 100
-#define ROOMCNT_MAX_LEN 1000
-#define ROOMNAME_MAX_LEN 100
+#define RES_RESPONSE_CODE 0
+#define RES_ROOM_LIST_CODE 1
+#define RES_USER_LIST_CODE 2
 
 //Set Initial Sub Struct
-struct Request_Code {
-	int code;
-	char error_log[ERROR_LOG_MAX_LEN];
-};
-
 struct RoomDesc {
 	int room_id;
-	char roomname[ROOMNAME_MAX_LEN];
+	char roomname[ROOM_NAME_MAX_LEN];
 };
 
 struct UserDesc {
 	int user_id;
-	char username[USERNAME_MAX_LEN];
+	char username[USER_NAME_MAX_LEN];
 	int status;
 };
 
 
 //Set Main Struct
-struct RoomList {
-	int room_cnt;
-	struct RoomDesc room_list[ROOMCNT_MAX_LEN];
+struct ResponseCode {
+	int code;
+	char error_log[LOG_MAX_LEN];
 };
 
-struct UserStatusList {
-	int room_num;
-	struct UserDesc user_list[USERCNT_MAX_LEN];
+struct RoomList {
+	int room_cnt;
+	struct RoomDesc list[ROOM_MAX];
 };
+
+struct UserList {
+	int user_cnt;
+	struct UserDesc list[USER_MAX];
+};
+
+void send_to_user(int uid, char* buf, int size);
+
+void response_code(int uid, int code, char* log, int size);
+void res_room_list(int uid);
+void res_user_list(int uid);

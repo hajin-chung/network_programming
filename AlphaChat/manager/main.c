@@ -16,6 +16,7 @@
 #include "utils.h"
 #include "set.h"
 #include "user.h"
+#include "room.h"
 
 int main()
 {
@@ -32,6 +33,10 @@ int main()
     printf("    SERVER    : %s:%d\n", SERVER_IP, TCP_PORT);
     printf("    HEARDBEAT : %d\n", UDP_PORT);
     printf("--------------------------------------\n");
+
+    // init rooms, users
+    memset(users, sizeof(users), 0);
+    memset(rooms, sizeof(rooms), 0);
 
     // init heartbeat_sock (udp)
     make_mcast_socket(&mcast_sock, &mcast_addr, MULTICAST_IP, MULTICAST_PORT);
@@ -60,6 +65,8 @@ int main()
         else if(fd_num == 0) // multicast server info every TIME_VAL_SECONDS seconds;
         {
             multicast_server_info(mcast_sock, mcast_addr);
+            print_room_info();
+            print_user_info();
         }
         else if(FD_ISSET(heartbeat_sock, &backup_set)) 
         {
@@ -132,7 +139,6 @@ void handle_heartbeat(int sock)
 
 void handle_new_user(int sock) 
 {
-    int i;
     int clnt_sock;
     int clnt_len;
     struct sockaddr_in clnt_addr;
@@ -145,11 +151,11 @@ void handle_new_user(int sock)
     uid = new_user_id();
     users[uid].status = USER_STATUS_ONLINE;
     users[uid].sock = clnt_sock;
-    users[uid].id = i;
+    users[uid].id = uid;
 
     FD_SET(clnt_sock, &fdset);
     if(clnt_sock > fd_cnt) fd_cnt = clnt_sock;
-    users_cnt++;
+    if(uid+1 > users_cnt) users_cnt = uid + 1;
 
     printf("[*] connection from (%s , %d)\n", 
         inet_ntoa(clnt_addr.sin_addr), ntohs(clnt_addr.sin_port));

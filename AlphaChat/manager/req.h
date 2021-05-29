@@ -1,12 +1,12 @@
 //req.h : FOR REQUEST FROM CLIENT
 
-#define USERNAME_MAX_LEN 100
-#define ROOMNAME_MAX_LEN 100
+#include "const.h"
+
 #define ROOMPASS_MAX_LEN 20
 #define CONTENTS_MAX_LEN 512
 #define MAX_REQ_BUF_SIZE 1024
 
-#define REQ_ROOM_CREATE_CODE 0
+#define REQ_ROOM_CREATE_CODE 8
 #define REQ_ROOM_DELETE_CODE 1 
 #define REQ_ROOM_CONNECT_CODE 2 
 #define REQ_SEND_CHAT_CODE 3
@@ -15,14 +15,18 @@
 #define REQ_ROOM_LIST_CODE 6
 #define REQ_USER_LIST_CODE 7
 
+#define CHAT_TYPE_TEXT 1
+#define CHAT_TYPE_EMOJ 2
+#define CHAT_TYPE_FILE 3
+
 //Set Main Struct
 struct Register {
-	char name[USERNAME_MAX_LEN];
+	char name[USER_NAME_MAX_LEN];
 };
 
 struct RoomCreate {
 	int user_id;
-	char room_name[ROOMNAME_MAX_LEN];
+	char room_name[ROOM_NAME_MAX_LEN];
 	char password[ROOMPASS_MAX_LEN];
 };
 
